@@ -3,12 +3,12 @@
 ## Information
 | case                |  information             |
 | ------------------- | ------------------------ |
+| 0_prepare_env       | prepare CUDA environment |
 | 1_cuda_reduce_study | recude use global memory |
 
 
 # Build
 ```bash
-cd 1_cuda_reduce_study/
 chmod +x build-for-debug.sh && ./build-for-debug.sh 
 ```
 
