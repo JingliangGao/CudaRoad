@@ -5,6 +5,6 @@
 
 int main()
 {
-    printf("Hello, World!\n");
+    printf("Hello, CUDA !\n");
     return 0;
 }

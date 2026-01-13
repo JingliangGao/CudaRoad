@@ -8,4 +8,5 @@ project(cuda_practice VERSION 0.1.0 LANGUAGES CXX C CUDA)
 find_package(CUDAToolkit)
 
 # add subdirectories
-add_subdirectory(1_cuda_reduce_study)
+add_subdirectory(0_prepare_env)
+add_subdirectory(1_reduce_v0_global_memory)
