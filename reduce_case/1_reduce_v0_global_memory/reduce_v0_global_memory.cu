@@ -3,7 +3,7 @@
 #include <cuda_runtime.h>
 #include <cuda.h>
 #include <iostream>
-
+#include <chrono>
 #define THREADS_PER_BLOCK 256
 
 /* 'reduce' kernel function */
@@ -33,8 +33,26 @@ __global__ void reduce(float *d_input, float *d_output) {
         d_output[blockIdx.x] = input_begin[0];   /* store result to global memory */
     }
 
+}
+
+/* 'reduce' kernel function */
+__global__ void reduce_v2(float *d_input, float *d_output) {
+    
+    int index = blockDim.x * blockIdx.x + threadIdx.x; /* pointer to global position */
+
+    for (int i = 1; i < blockDim.x; i *= 2) {
+        if (threadIdx.x % (i * 2) == 0) {
+            d_input[index] += d_input[index + i];
+        }
+        __syncthreads();
+    }
+
+    if (threadIdx.x == 0) {
+        d_output[blockIdx.x] = d_input[index];   /* store result to global memory */
+    }
 
 }
+
 
 
 /* check function */
@@ -50,7 +68,7 @@ bool check(float *out, float *res, int n) {
 
 int main()
 {
-    const int N = 32 * 1024 * 1024;
+    const int N = 32 * 1024 * 1024; /* number of elements in the array */
 
     float *h_input = (float *)malloc(sizeof(float) * N);  /* malloc host memory */
     float *d_input;
@@ -61,12 +79,12 @@ int main()
     float *d_output;
     cudaMalloc((void **)&d_output, sizeof(float) * block_num);      /* malloc device memory for output*/
     float *h_result = (float *)malloc(sizeof(float) * block_num);   /* malloc host memory for storage result */
-    std::cout << "**** Memory allocation *****" << std::endl;
+    std::cout << "***** Memory allocation *****" << std::endl;
     std::cout << "Host input size  : " << sizeof(float) * N / (1024.0f * 1024.0f) << " MB" << std::endl;
     std::cout << "Device input size: " << sizeof(float) * N / (1024.0f * 1024.0f) << " MB" << std::endl;
     std::cout << "Host output size : " << sizeof(float) * block_num / 1024.0f << " KB" << std::endl;    
     std::cout << "Device output size: " << sizeof(float) * block_num / 1024.0f << " KB" << std::endl;
-    std::cout << "****************************" << std::endl;
+    std::cout << "*****************************" << std::endl;
 
     /* initialize input data */
     for (int i = 0; i < N; i++)
@@ -75,6 +93,7 @@ int main()
     }
 
     /* CPU reduction */
+    auto t_host_start = std::chrono::high_resolution_clock::now();
     for (int i = 0; i < block_num; i++)
     {
         float cur_result = 0.0;
@@ -83,13 +102,18 @@ int main()
         }
         h_result[i] = cur_result;
     }
+    auto t_host_end = std::chrono::high_resolution_clock::now();
     std::cout << ">> [INFO] CPU reduction done " << std::endl;
 
+    auto t_device_start = std::chrono::high_resolution_clock::now();
     cudaMemcpy(d_input, h_input, sizeof(float)*N, cudaMemcpyHostToDevice);   /* copy input data from host to device */
-    dim3 Grid(block_num, 1);
-    dim3 Block(THREADS_PER_BLOCK,1);
-    reduce<<<Grid, Block>>>(d_input, d_output);   /* launch kernel */
+    auto t_h2d_end = std::chrono::high_resolution_clock::now();
+    dim3 Grid(block_num, 1, 1);
+    dim3 Block(THREADS_PER_BLOCK, 1, 1);
+    reduce_v2<<<Grid, Block>>>(d_input, d_output);   /* launch kernel */
+    auto t_kernel_end = std::chrono::high_resolution_clock::now();
     cudaMemcpy(h_output, d_output, block_num*sizeof(float), cudaMemcpyDeviceToHost);
+    auto t_device_end = std::chrono::high_resolution_clock::now();
     std::cout << ">> [INFO] GPU reduction done " << std::endl;
 
     /* compare result */
@@ -98,6 +122,13 @@ int main()
     }else{
         printf(">> [ERROR] The result is wrong! \n");
     }
+
+    std::cout << "***** Time Consume *****" << std::endl;
+    std::cout << "Host CPU time: " << std::chrono::duration_cast<std::chrono::microseconds>(t_host_end - t_host_start).count() << " microseconds" << std::endl;
+    std::cout << "Device H2D time: " << std::chrono::duration_cast<std::chrono::microseconds>(t_h2d_end - t_device_start).count() << " microseconds" << std::endl;
+    std::cout << "Device kernel time: " << std::chrono::duration_cast<std::chrono::microseconds>(t_kernel_end - t_h2d_end).count() << " microseconds" << std::endl;
+    std::cout << "Device D2H time: " << std::chrono::duration_cast<std::chrono::microseconds>(t_device_end - t_kernel_end).count() << " microseconds" << std::endl;
+    std::cout << "************************" << std::endl;
 
     /* free memory */
     cudaFree(d_input);
