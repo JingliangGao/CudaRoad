@@ -6,24 +6,49 @@
 #include <chrono>
 #define THREADS_PER_BLOCK 256
 
-
 /* 'reduce' kernel function */
 __global__ void reduce(float *d_input, float *d_output) {
+    
+    float *input_begin = d_input + blockIdx.x * blockDim.x;    /* pointer to each block's beginning position */
+    // if (threadIdx.x == 0 or 2 or 4 or 6) {
+    //     input_begin[threadIdx.x] += input_begin[threadIdx.x + 1];
+    // }
 
-    __shared__ float shared_data[THREADS_PER_BLOCK];   /* create array in shared memory */
-    int index = blockDim.x * blockIdx.x + threadIdx.x; /* pointer to global position */
-    shared_data[threadIdx.x] = d_input[index];         /* load data : global memory -> shared memory */
-    __syncthreads();    /* ensure all threads have loaded data */
+    // if (threadIdx.x == 0 or 4) {
+    //     input_begin[threadIdx.x] += input_begin[threadIdx.x + 2];
+    // }
+
+    // if (threadIdx.x == 0) {
+    //     input_begin[threadIdx.x] += input_begin[threadIdx.x + 4];
+    // }
 
     for (int i = 1; i < blockDim.x; i *= 2) {
         if (threadIdx.x % (i * 2) == 0) {
-            shared_data[threadIdx.x] += shared_data[threadIdx.x + i];
+            input_begin[threadIdx.x] += input_begin[threadIdx.x + i];
         }
         __syncthreads();
     }
 
     if (threadIdx.x == 0) {
-        d_output[blockIdx.x] = shared_data[0];   /* store result to global memory */
+        d_output[blockIdx.x] = input_begin[0];   /* store result to global memory */
+    }
+
+}
+
+/* 'reduce' kernel function */
+__global__ void reduce_v2(float *d_input, float *d_output) {
+    
+    int index = blockDim.x * blockIdx.x + threadIdx.x; /* pointer to global position */
+
+    for (int i = 1; i < blockDim.x; i *= 2) {
+        if (threadIdx.x % (i * 2) == 0) {
+            d_input[index] += d_input[index + i];
+        }
+        __syncthreads();
+    }
+
+    if (threadIdx.x == 0) {
+        d_output[blockIdx.x] = d_input[index];   /* store result to global memory */
     }
 
 }
@@ -85,7 +110,7 @@ int main()
     auto t_h2d_end = std::chrono::high_resolution_clock::now();
     dim3 Grid(block_num, 1, 1);
     dim3 Block(THREADS_PER_BLOCK, 1, 1);
-    reduce<<<Grid, Block>>>(d_input, d_output);   /* launch kernel */
+    reduce_v2<<<Grid, Block>>>(d_input, d_output);   /* launch kernel */
     auto t_kernel_end = std::chrono::high_resolution_clock::now();
     cudaMemcpy(h_output, d_output, block_num*sizeof(float), cudaMemcpyDeviceToHost);
     auto t_device_end = std::chrono::high_resolution_clock::now();
