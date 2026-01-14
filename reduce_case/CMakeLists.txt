@@ -9,4 +9,5 @@ find_package(CUDAToolkit)
 
 # add subdirectories
 add_subdirectory(0_prepare_env)
-add_subdirectory(1_reduce_v0_global_memory)
+add_subdirectory(1_reduce_global_memory)
+add_subdirectory(2_reduce_shared_memory)

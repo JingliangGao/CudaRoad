@@ -18,10 +18,13 @@ make -j
 # run case
 echo ">> [INFO] Run 'print_string' case ..."
 cd ${CASE_DIR}/
-./build/0_prepare_env/print_string
+./build/0_prepare_env/print_string > ./build/0_prepare_env/print_string.log 2>&1
 
-echo ">> [INFO] Run 'reduce_v0_global_memory' case ..."
-./build/1_reduce_v0_global_memory/reduce_v0_global_memory
+echo ">> [INFO] Run 'reduce_global_memory' case ..."
+./build/1_reduce_global_memory/reduce_global_memory > ./build/1_reduce_global_memory/reduce_global_memory.log 2>&1
+
+echo ">> [INFO] Run 'reduce_shared_memory' case ..."
+./build/2_reduce_shared_memory/reduce_shared_memory > ./build/2_reduce_shared_memory/reduce_shared_memory.log 2>&1
 
 echo ">> [INFO] Run cases success!"
 
