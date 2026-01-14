@@ -1,10 +1,13 @@
 # Reduce Case
 
 ## Information
-| case                |  information             |
-| ------------------- | ------------------------ |
-| 0_prepare_env       | prepare CUDA environment |
-| 1_cuda_reduce_study | recude use global memory |
+| case                   |  information                    |
+| ---------------------- | ------------------------------- |
+| doc                    | document                        |
+| third_party            | reference code                  |
+| 0_prepare_env          | prepare CUDA environment        |
+| 1_reduce_global_memory | 'reduce' op using global memory |
+| 2_reduce_shared_memory | 'reduce' op using shared memory |
 
 
 # Build
