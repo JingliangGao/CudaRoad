@@ -1,14 +1,17 @@
 # Reduce Case
 
 ## Information
-| case                         |  information                             |
-| ---------------------------- | ---------------------------------------- |
-| doc                          | document                                 |
-| third_party                  | reference code                           |
-| 0_prepare_env                | prepare CUDA environment                 |
-| 1_reduce_global_memory       | 'reduce' op using global memory          |
-| 2_reduce_shared_memory       | 'reduce' op using shared memory          |
-| 3_reduce_no_divergence_branch| 'reduce' op decreasing wrap divergence   |
+| case                           |  information                                 |
+| ------------------------------ | -------------------------------------------- |
+| doc                            | document                                     |
+| third_party                    | reference code                               |
+| 0_prepare_env                  | prepare CUDA environment                     |
+| 1_reduce_global_memory         | 'reduce' op using global memory              |
+| 2_reduce_shared_memory         | 'reduce' op using shared memory              |
+| 3_reduce_no_divergence_branch  | 'reduce' op decreasing wrap divergence       |
+| 4_reduce_no_bank_conflict      | 'reduce' op without bank conflict            |
+| 5_reduce_add_during_load_PlanA | 'reduce' op add during load process (Plan A) |
+| 6_reduce_add_during_load_PlanB | 'reduce' op add during load process (Plan B) |
 
 
 # Build

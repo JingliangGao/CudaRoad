@@ -32,5 +32,11 @@ echo ">> [INFO] Run 'reduce_no_divergence_branch' case ..."
 echo ">> [INFO] Run 'reduce_no_bank_conflict' case ..."
 ./build/4_reduce_no_bank_conflict/reduce_no_bank_conflict > ./build/4_reduce_no_bank_conflict/reduce_no_bank_conflict.log 2>&1
 
+echo ">> [INFO] Run 'reduce_add_during_load(Plan A)' case ..."
+./build/5_reduce_add_during_load_PlanA/reduce_add_during_load_PlanA > ./build/5_reduce_add_during_load_PlanA/reduce_add_during_load_PlanA.log 2>&1
+
+echo ">> [INFO] Run 'reduce_add_during_load(Plan B)'  case ..."
+./build/6_reduce_add_during_load_PlanB/reduce_add_during_load_PlanB > ./build/6_reduce_add_during_load_PlanB/reduce_add_during_load_PlanB.log 2>&1
+
 echo ">> [INFO] Run cases success!"
 
