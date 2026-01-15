@@ -1,0 +1,15 @@
+***** Memory allocation *****
+Host input size  : 128 MB
+Device input size: 128 MB
+Host output size : 512 KB
+Device output size: 512 KB
+*****************************
+>> [INFO] CPU reduction done 
+>> [INFO] GPU reduction done 
+>> [INFO] The result is right. 
+***** Time Consume *****
+Host CPU time: 94970 microseconds
+Device H2D time: 25313 microseconds
+Device kernel time: 29 microseconds
+Device D2H time: 1358 microseconds
+************************
