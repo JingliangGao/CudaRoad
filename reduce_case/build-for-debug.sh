@@ -29,5 +29,8 @@ echo ">> [INFO] Run 'reduce_shared_memory' case ..."
 echo ">> [INFO] Run 'reduce_no_divergence_branch' case ..."
 ./build/3_reduce_no_divergence_branch/reduce_no_divergence_branch > ./build/3_reduce_no_divergence_branch/reduce_no_divergence_branch.log 2>&1
 
+echo ">> [INFO] Run 'reduce_no_bank_conflict' case ..."
+./build/4_reduce_no_bank_conflict/reduce_no_bank_conflict > ./build/4_reduce_no_bank_conflict/reduce_no_bank_conflict.log 2>&1
+
 echo ">> [INFO] Run cases success!"
 
