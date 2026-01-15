@@ -26,5 +26,8 @@ echo ">> [INFO] Run 'reduce_global_memory' case ..."
 echo ">> [INFO] Run 'reduce_shared_memory' case ..."
 ./build/2_reduce_shared_memory/reduce_shared_memory > ./build/2_reduce_shared_memory/reduce_shared_memory.log 2>&1
 
+echo ">> [INFO] Run 'reduce_no_divergence_branch' case ..."
+./build/3_reduce_no_divergence_branch/reduce_no_divergence_branch > ./build/3_reduce_no_divergence_branch/reduce_no_divergence_branch.log 2>&1
+
 echo ">> [INFO] Run cases success!"
 
