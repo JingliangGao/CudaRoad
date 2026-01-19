@@ -124,10 +124,8 @@ int main()
     }
 
     std::cout << "***** Time Consume *****" << std::endl;
-    std::cout << "Host CPU time: " << std::chrono::duration_cast<std::chrono::microseconds>(t_host_end - t_host_start).count() << " microseconds" << std::endl;
-    std::cout << "Device H2D time: " << std::chrono::duration_cast<std::chrono::microseconds>(t_h2d_end - t_device_start).count() << " microseconds" << std::endl;
-    std::cout << "Device kernel time: " << std::chrono::duration_cast<std::chrono::microseconds>(t_kernel_end - t_h2d_end).count() << " microseconds" << std::endl;
-    std::cout << "Device D2H time: " << std::chrono::duration_cast<std::chrono::microseconds>(t_device_end - t_kernel_end).count() << " microseconds" << std::endl;
+    std::cout << "Host cost time: " << std::chrono::duration_cast<std::chrono::microseconds>(t_host_end - t_host_start).count() << " microseconds" << std::endl;
+    std::cout << "Device cost time: " << std::chrono::duration_cast<std::chrono::microseconds>(t_device_end - t_device_start).count() << " microseconds (H2D: " << std::chrono::duration_cast<std::chrono::microseconds>(t_h2d_end - t_device_start).count() << ", kernel: " << std::chrono::duration_cast<std::chrono::microseconds>(t_kernel_end - t_h2d_end).count() << ", D2H: " << std::chrono::duration_cast<std::chrono::microseconds>(t_device_end - t_kernel_end).count() << ")" << std::endl;
     std::cout << "************************" << std::endl;
 
     /* free memory */

@@ -4,23 +4,35 @@
 #include <cuda.h>
 #include <iostream>
 #include <chrono>
-#define THREADS_PER_BLOCK 256
 
+#define THREADS_PER_BLOCK 256
 
 /* 'reduce' kernel function */
 __global__ void reduce(float *d_input, float *d_output) {
 
     __shared__ float shared_data[THREADS_PER_BLOCK];   /* create array in shared memory */
-    int index = blockDim.x * blockIdx.x + threadIdx.x; /* pointer to global position */
-    shared_data[threadIdx.x] = d_input[index];         /* load data : global memory -> shared memory */
+    float *input_begin = d_input + blockIdx.x * blockDim.x * 2;    /* pointer to each block's beginning position */
+    shared_data[threadIdx.x] = input_begin[threadIdx.x] + input_begin[threadIdx.x + blockDim.x];         /* add during load data process */
     __syncthreads();    /* ensure all threads have loaded data */
 
-    for (int i = 1; i < blockDim.x; i *= 2) {
-        if (threadIdx.x % (i * 2) == 0) {
+    for (int i = blockDim.x/2; i > 32; i /= 2) {
+        if (threadIdx.x < i) {
             shared_data[threadIdx.x] += shared_data[threadIdx.x + i];
         }
         __syncthreads();
     }
+
+    if (threadIdx.x < 32)
+    {
+        volatile float *vsmem = shared_data;   /* use volatile pointer to avoid compiler optimization */
+        vsmem[threadIdx.x] += vsmem[threadIdx.x + 32];
+        vsmem[threadIdx.x] += vsmem[threadIdx.x + 16];
+        vsmem[threadIdx.x] += vsmem[threadIdx.x + 8];
+        vsmem[threadIdx.x] += vsmem[threadIdx.x + 4];
+        vsmem[threadIdx.x] += vsmem[threadIdx.x + 2];
+        vsmem[threadIdx.x] += vsmem[threadIdx.x + 1];
+    }
+    
 
     if (threadIdx.x == 0) {
         d_output[blockIdx.x] = shared_data[0];   /* store result to global memory */
@@ -49,7 +61,7 @@ int main()
     float *d_input;
     cudaMalloc((void **)&d_input, sizeof(float) * N);     /* malloc device memory */
 
-    int block_num = N / THREADS_PER_BLOCK;  /* number of blocks */
+    int block_num = N / THREADS_PER_BLOCK / 2;  /* number of blocks */
     float *h_output = (float *)malloc(sizeof(float) * block_num);   /* malloc host memory for output */
     float *d_output;
     cudaMalloc((void **)&d_output, sizeof(float) * block_num);      /* malloc device memory for output*/
@@ -72,8 +84,8 @@ int main()
     for (int i = 0; i < block_num; i++)
     {
         float cur_result = 0.0;
-        for (int j =0; j < THREADS_PER_BLOCK; j ++) {
-            cur_result += h_input[i*THREADS_PER_BLOCK + j];
+        for (int j =0; j < 2 * THREADS_PER_BLOCK; j ++) {
+            cur_result += h_input[i* 2 * THREADS_PER_BLOCK + j];
         }
         h_result[i] = cur_result;
     }

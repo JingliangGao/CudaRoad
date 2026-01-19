@@ -38,5 +38,14 @@ echo ">> [INFO] Run 'reduce_add_during_load(Plan A)' case ..."
 echo ">> [INFO] Run 'reduce_add_during_load(Plan B)'  case ..."
 ./build/6_reduce_add_during_load_PlanB/reduce_add_during_load_PlanB > ./build/6_reduce_add_during_load_PlanB/6_reduce_add_during_load_PlanB.log 2>&1
 
+echo ">> [INFO] Run 'reduce_unroll_last_dim'  case ..."
+./build/7_reduce_unroll_last_dim/reduce_unroll_last_dim > ./build/7_reduce_unroll_last_dim/7_reduce_unroll_last_dim.log 2>&1
+
 echo ">> [INFO] Run cases success!"
+
+# collect log files
+# cd ${CASE_DIR}/
+# find ./build -type f -name "*.log" -exec cp {} doc/log/ \;
+
+echo ">> [INFO] All done!"
 

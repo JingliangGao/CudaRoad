@@ -1,13 +1,13 @@
 ***** Memory allocation *****
 Host input size  : 128 MB
 Device input size: 128 MB
-Host output size : 512 KB
-Device output size: 512 KB
+Host output size : 256 KB
+Device output size: 256 KB
 *****************************
 >> [INFO] CPU reduction done 
 >> [INFO] GPU reduction done 
 >> [INFO] The result is right. 
 ***** Time Consume *****
-Host cost time: 94822 microseconds
-Device cost time: 26424 microseconds (H2D: 25017, kernel: 30, D2H: 1376)
+Host cost time: 96550 microseconds
+Device cost time: 25831 microseconds (H2D: 25344, kernel: 42, D2H: 444)
 ************************

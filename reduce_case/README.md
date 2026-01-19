@@ -12,6 +12,7 @@
 | 4_reduce_no_bank_conflict      | 'reduce' op without bank conflict            |
 | 5_reduce_add_during_load_PlanA | 'reduce' op add during load process (Plan A) |
 | 6_reduce_add_during_load_PlanB | 'reduce' op add during load process (Plan B) |
+| 7_reduce_unroll_last_dim       | 'reduce' op  unroll at last dim              |
 
 
 # Build

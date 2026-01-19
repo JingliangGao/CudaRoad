@@ -8,8 +8,6 @@ Device output size: 512 KB
 >> [INFO] GPU reduction done 
 >> [INFO] The result is right. 
 ***** Time Consume *****
-Host CPU time: 94203 microseconds
-Device H2D time: 25292 microseconds
-Device kernel time: 42 microseconds
-Device D2H time: 443 microseconds
+Host cost time: 95915 microseconds
+Device cost time: 26366 microseconds (H2D: 25615, kernel: 41, D2H: 709)
 ************************
