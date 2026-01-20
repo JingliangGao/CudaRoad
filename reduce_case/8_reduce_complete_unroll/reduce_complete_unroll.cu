@@ -15,6 +15,7 @@ __global__ void reduce(float *d_input, float *d_output) {
     shared_data[threadIdx.x] = input_begin[threadIdx.x] + input_begin[threadIdx.x + blockDim.x];         /* add during load data process */
     __syncthreads();    /* ensure all threads have loaded data */
 
+    #pragma unroll
     for (int i = blockDim.x/2; i > 32; i /= 2) {
         if (threadIdx.x < i) {
             shared_data[threadIdx.x] += shared_data[threadIdx.x + i];

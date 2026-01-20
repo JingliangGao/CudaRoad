@@ -41,6 +41,9 @@ echo ">> [INFO] Run 'reduce_add_during_load(Plan B)'  case ..."
 echo ">> [INFO] Run 'reduce_unroll_last_dim'  case ..."
 ./build/7_reduce_unroll_last_dim/reduce_unroll_last_dim > ./build/7_reduce_unroll_last_dim/7_reduce_unroll_last_dim.log 2>&1
 
+echo ">> [INFO] Run 'reduce_complete_unroll'  case ..."
+./build/8_reduce_complete_unroll/reduce_complete_unroll > ./build/8_reduce_complete_unroll/8_reduce_complete_unroll.log 2>&1
+
 echo ">> [INFO] Run cases success!"
 
 # collect log files
