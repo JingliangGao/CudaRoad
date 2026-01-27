@@ -5,7 +5,7 @@
 GPU带宽 = 内存频率 * Prefetch * (内存位宽/8)
 ```
 
-## picture
+## 延时、带宽、吞吐量
 ![information](data.png)
 
 ## Reference
