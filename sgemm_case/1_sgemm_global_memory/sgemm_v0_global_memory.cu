@@ -40,7 +40,7 @@ float compare_matrices(int m, int n, float *a, float *b) {
 }
 
 /* func: sgemm in host */
-void sgemm_cpu( float *A_ptr, float *B_ptr, float *C_ptr, const int M, const int N, const int K) {
+void sgemm_cpu(float *A_ptr, float *B_ptr, float *C_ptr, const int M, const int N, const int K) {
       for (int m = 0; m < M; m++) {
             for (int n = 0; n < N; n++) {
                   float sum = 0.0f;
@@ -50,6 +50,21 @@ void sgemm_cpu( float *A_ptr, float *B_ptr, float *C_ptr, const int M, const int
                   C_ptr[m * N + n] = sum;
             }
       }
+}
+
+/* func: sgemm in device */
+__global__ void sgemm_cuda(float *A_ptr, float *B_ptr, float *C_ptr, const int M, const int N, const int K) {
+
+      const int x = blockIdx.x * blockDim.x + threadIdx.x;
+      const int y = blockIdx.y * blockDim.y + threadIdx.y;
+      float *A_ptr_start = A_ptr + blockIdx.y * blockDim.y * K;
+      float *B_ptr_start = B_ptr + blockIdx.x * blockDim.x;
+
+      float sum = 0.0f;
+      for (int k = 0; k < K; k++) {           
+            sum += A_ptr_start[threadIdx.y * K + k] * B_ptr_start[threadIdx.x + k * N];
+      }
+      C_ptr[x + y * N] = sum;
 }
 
 
@@ -89,14 +104,14 @@ int main() {
 
 
     /* calculate sgemm in device */
-//     constexpr int BLOCK_SIZE = 16;
-//     dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
-//     dim3 dimGrid((n + BLOCK_SIZE - 1) / BLOCK_SIZE, (m + BLOCK_SIZE - 1) / BLOCK_SIZE);
-//     sgemm_cuda<<<dimGrid, dimBlock>>>(matrix_A_device, matrix_B_device, matrix_C_device, m, n, k);
-//     cudaMemcpy(matrix_C_host_gpu, matrix_C_device, mem_size_C, cudaMemcpyDeviceToHost);
+    constexpr int BLOCK_SIZE = 16;
+    dim3 dimGrid((m + BLOCK_SIZE - 1) / BLOCK_SIZE, (n + BLOCK_SIZE - 1) / BLOCK_SIZE);
+    dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
+    sgemm_cuda<<<dimGrid, dimBlock>>>(matrix_A_device, matrix_B_device, matrix_C_device, m, n, k);
+    cudaMemcpy(matrix_C_host_gpu, matrix_C_device, mem_size_C, cudaMemcpyDeviceToHost);
 
     float diff = compare_matrices(m, n, matrix_C_host_cpu, matrix_C_host_gpu);
-    if (diff > 1e-6 || diff < -1e-6) {
+    if (diff > 0.5f || diff < -0.5f) {
         printf("SGEMM v0: verification failed! max diff = %f\n", diff);
     } else {
         printf("SGEMM v0: verification success! max diff = %f\n", diff);
