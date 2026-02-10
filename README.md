@@ -6,3 +6,4 @@ Learn CUDA step by step
 | -------------- | ---------------------- | 
 | reduce_case    |  optimize 'Recude' op  |
 | hardware_tools |  CUDA tools            |
+| sgemm_case     |  Single Float GEMM     |

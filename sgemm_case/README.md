@@ -1,5 +1,5 @@
-# sgemm_case
-
+# SGEMM
+半精度的通用乘法
 
 ## Reference
 1. [cuda 入门的正确姿势：how-to-optimize-gemm](https://zhuanlan.zhihu.com/p/478846788)

@@ -56,24 +56,26 @@ void sgemm_cpu(float *A_ptr, float *B_ptr, float *C_ptr, const int M, const int 
 
 /* func: sgemm in device */
 __global__ void sgemm_cuda(float *A_ptr, float *B_ptr, float *C_ptr, const int M, const int N, const int K) {
-
+      /* Mat_C position */
       const int x = blockIdx.x * blockDim.x + threadIdx.x;
       const int y = blockIdx.y * blockDim.y + threadIdx.y;
+
+      /* Mat_A, Mat_B block start pointer */
       float *A_ptr_start = A_ptr + blockIdx.y * blockDim.y * K;
       float *B_ptr_start = B_ptr + blockIdx.x * blockDim.x;
 
-      float sum = 0.0f;
-      for (int k = 0; k < K; k++) {           
-            sum += A_ptr_start[threadIdx.y * K + k] * B_ptr_start[threadIdx.x + k * N];
+      float sum = 0.0f;    /* temporary store sum result */
+      for (int k = 0; k < K; k++) {   /* traverse K elements */        
+            sum += A_ptr_start[threadIdx.y * K + k] * B_ptr_start[k * N + threadIdx.x];
       }
       C_ptr[x + y * N] = sum;
 }
 
 
 int main() {
-    int m = 2048;
-    int n = 2048;
-    int k = 2048;
+    int m = 512;
+    int n = 512;
+    int k = 512;
 
     const size_t mem_size_A = sizeof(float) * m * k;
     const size_t mem_size_B = sizeof(float) * k * n;

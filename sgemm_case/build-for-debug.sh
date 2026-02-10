@@ -16,6 +16,11 @@ cmake ../
 make -j
 
 # run case
-echo ">> [INFO] Run 'sgemm_v0_global_memory' case ..."
+echo ">> [INFO] Run 'sgemm_global_memory' case ..."
 cd ${CASE_DIR}/
-./build/1_sgemm_global_memory/sgemm_v0_global_memory > ./build/1_sgemm_global_memory/1_sgemm_global_memory.log 2>&1
+./build/1_sgemm_global_memory/sgemm_global_memory > ./build/1_sgemm_global_memory/1_sgemm_global_memory.log 2>&1
+
+# run case
+echo ">> [INFO] Run 'sgemm_shared_memory' case ..."
+cd ${CASE_DIR}/
+./build/2_sgemm_shared_memory/sgemm_shared_memory > ./build/2_sgemm_shared_memory/2_sgemm_shared_memory.log 2>&1
