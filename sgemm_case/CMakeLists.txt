@@ -10,3 +10,5 @@ find_package(CUDAToolkit)
 # add subdirectories
 add_subdirectory(1_sgemm_global_memory)
 add_subdirectory(2_sgemm_shared_memory)
+add_subdirectory(3_sgemm_shared_memory_sliding_window)
+                 
