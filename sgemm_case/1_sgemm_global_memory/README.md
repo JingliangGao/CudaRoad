@@ -1,11 +1,12 @@
 # SGEMM using global memory
+利用全局内存计算SGEMM
 
 ## Description
 对于矩阵A[M, K]、矩阵B[K, N]，求解矩阵相乘结果，即矩阵C[M, N]。
 ![matrix](image/A_mat_B.png)
 
-观察矩阵C，显然‘写出（Write）’计算量为 M x N 。        
-计算矩阵C中的每一个元素，都需要分别从矩阵A、矩阵B读取K个元素，即‘2K’，那么‘读入（READ）’计算量为‘M x N x 2K’。
+观察矩阵C，显然‘写出（Write）计算量’为 M x N 。        
+计算矩阵C中的每一个元素，都需要分别从矩阵A、矩阵B读取K个元素，即‘2K’，那么‘读入（READ）计算量’为‘M x N x 2K’。
 
 ## Kernel
 Kernel 程序如下：

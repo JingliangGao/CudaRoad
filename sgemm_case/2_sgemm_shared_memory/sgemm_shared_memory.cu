@@ -55,6 +55,7 @@ void sgemm_cpu(float *A_ptr, float *B_ptr, float *C_ptr, const int M, const int 
 }
 
 /* func: sgemm in device */
+template <unsigned int BLOCK_SIZE, unsigned int TILE_SIZE>
 __global__ void sgemm_cuda(float *A_ptr, float *B_ptr, float *C_ptr, const int M, const int N, const int K) {
 
       const int x = blockIdx.x * blockDim.x + threadIdx.x;
@@ -62,18 +63,29 @@ __global__ void sgemm_cuda(float *A_ptr, float *B_ptr, float *C_ptr, const int M
       float *A_ptr_start = A_ptr + blockIdx.y * blockDim.y * K;
       float *B_ptr_start = B_ptr + blockIdx.x * blockDim.x;
 
+      /* copy data : global memory -> shared memory */
+      __shared__ float A_shared[BLOCK_SIZE][TILE_SIZE];
+      __shared__ float B_shared[TILE_SIZE][BLOCK_SIZE];
+      for(int s = 0; s < K; s+=blockDim.x) {
+            A_shared[threadIdx.y][threadIdx.x+ s] = A_ptr_start[threadIdx.x + s + threadIdx.y * K];
+            B_shared[threadIdx.y + s][threadIdx.x] = B_ptr_start[(threadIdx.y + s) * N + threadIdx.x];
+      }
+      __syncthreads();
+
       float sum = 0.0f;
       for (int k = 0; k < K; k++) {           
-            sum += A_ptr_start[threadIdx.y * K + k] * B_ptr_start[threadIdx.x + k * N];
+            sum += A_shared[threadIdx.y][k] * B_shared[k][threadIdx.x];
       }
+
       C_ptr[x + y * N] = sum;
 }
 
 
 int main() {
-    int m = 512;
-    int n = 512;
-    int k = 512;
+    constexpr int m = 256;
+    constexpr int n = 256;
+    constexpr int k = 256;
+    constexpr int BLOCK_SIZE = 16;
 
     const size_t mem_size_A = sizeof(float) * m * k;
     const size_t mem_size_B = sizeof(float) * k * n;
@@ -98,13 +110,22 @@ int main() {
     cudaMalloc((void **)&matrix_B_device, mem_size_B);
     cudaMalloc((void **)&matrix_C_device, mem_size_C);
 
+    /* get shared memory information in device */
+    cudaDeviceProp prop;
+    cudaGetDeviceProperties(&prop, 0);
+    size_t shared_bytes = (BLOCK_SIZE * k + k * BLOCK_SIZE) * sizeof(float);
+
+
     std::cout << "*************************** Memory Allocation ***************************" << std::endl;
-    std::cout << "Host matrix_A size  : " << sizeof(float) * mem_size_A / (1024.0f * 1024.0f) << " MB" << std::endl;
-    std::cout << "Host matrix_B size  : " << sizeof(float) * mem_size_B / (1024.0f * 1024.0f) << " MB" << std::endl;
-    std::cout << "Host matrix_C size  : " << sizeof(float) * mem_size_C / (1024.0f * 1024.0f) << " MB" << std::endl;
-    std::cout << "Device matrix_A size: " << sizeof(float) * mem_size_A / (1024.0f * 1024.0f) << " MB" << std::endl;
-    std::cout << "Device matrix_B size: " << sizeof(float) * mem_size_B / (1024.0f * 1024.0f) << " MB" << std::endl;
-    std::cout << "Device matrix_C size: " << sizeof(float) * mem_size_C / (1024.0f * 1024.0f) << " MB" << std::endl;
+    std::cout << "Host matrix_A memory  : " << sizeof(float) * mem_size_A / (1024.0f * 1024.0f) << " MB" << std::endl;
+    std::cout << "Host matrix_B memory  : " << sizeof(float) * mem_size_B / (1024.0f * 1024.0f) << " MB" << std::endl;
+    std::cout << "Host matrix_C memory  : " << sizeof(float) * mem_size_C / (1024.0f * 1024.0f) << " MB" << std::endl;
+    std::cout << "Device matrix_A memory: " << sizeof(float) * mem_size_A / (1024.0f * 1024.0f) << " MB" << std::endl;
+    std::cout << "Device matrix_B memory: " << sizeof(float) * mem_size_B / (1024.0f * 1024.0f) << " MB" << std::endl;
+    std::cout << "Device matrix_C memory: " << sizeof(float) * mem_size_C / (1024.0f * 1024.0f) << " MB" << std::endl;
+    std::cout << "Tile memory: " << shared_bytes / 1024.0f << " KB" << std::endl;
+    std::cout << "Shared memory per block: " << prop.sharedMemPerBlock / 1024.0f << " KB" << std::endl;
+    std::cout << "Shared memory per SM: " << prop.sharedMemPerMultiprocessor / 1024.0f << " KB" << std::endl;
     std::cout << "*************************************************************************" << std::endl;
 
     /* initialize matrix in host */
@@ -123,10 +144,13 @@ int main() {
     cudaMemcpy(matrix_A_device, matrix_A_host, mem_size_A, cudaMemcpyHostToDevice);
     cudaMemcpy(matrix_B_device, matrix_B_host, mem_size_B, cudaMemcpyHostToDevice);
     auto t_device_H2D = std::chrono::high_resolution_clock::now();
-    constexpr int BLOCK_SIZE = 16;
     dim3 dimGrid((m + BLOCK_SIZE - 1) / BLOCK_SIZE, (n + BLOCK_SIZE - 1) / BLOCK_SIZE);
     dim3 dimBlock(BLOCK_SIZE, BLOCK_SIZE);
-    sgemm_cuda<<<dimGrid, dimBlock>>>(matrix_A_device, matrix_B_device, matrix_C_device, m, n, k);
+    std::cout << "*************************** Dim Information ***************************" << std::endl;
+    std::cout << "dimGrid: " << dimGrid.x << " x " << dimGrid.y << std::endl;
+    std::cout << "dimBlock: " << dimBlock.x << " x " << dimBlock.y << std::endl;
+    std::cout << "***********************************************************************" << std::endl;
+    sgemm_cuda<BLOCK_SIZE, k><<<dimGrid, dimBlock>>>(matrix_A_device, matrix_B_device, matrix_C_device, m, n, k);
     auto t_device_kernel = std::chrono::high_resolution_clock::now();
     cudaMemcpy(matrix_C_host_gpu, matrix_C_device, mem_size_C, cudaMemcpyDeviceToHost);
     auto t_device_D2H = std::chrono::high_resolution_clock::now();
