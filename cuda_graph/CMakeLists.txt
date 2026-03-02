@@ -11,5 +11,8 @@ find_package(CUDAToolkit)
 add_subdirectory(1_check_async_engine)
 add_subdirectory(2_multi_cuda_stream)
 add_subdirectory(3_measure_cuda_event)
+add_subdirectory(4_capture_cuda_graph)
+add_subdirectory(5_cuda_memory_no_graph)
+add_subdirectory(6_cuda_memory_use_graph)
 
                  

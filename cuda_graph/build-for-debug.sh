@@ -23,3 +23,10 @@ echo ">> [INFO] Run cases 'multi_cuda_stream' ..."
 ./build/2_multi_cuda_stream/multi_cuda_stream
 echo ">> [INFO] Run cases 'measure_cuda_event' ..."
 ./build/3_measure_cuda_event/measure_cuda_event
+echo ">> [INFO] Run cases 'capture_cuda_graph' ..."
+./build/4_capture_cuda_graph/capture_cuda_graph
+echo ">> [INFO] Run cases '5_cuda_memory_no_graph' ..."
+./build/5_cuda_memory_no_graph/cuda_memory_no_graph
+echo ">> [INFO] Run cases '6_cuda_memory_use_graph' ..."
+./build/6_cuda_memory_use_graph/cuda_memory_use_graph
+echo ">> [INFO] All cases done."
